@@ -1,17 +1,27 @@
 import * as Location from 'expo-location';
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, StyleSheet, Text, ScrollView, Dimensions } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  ScrollView,
+  Dimensions,
+  ActivityIndicator,
+} from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const API_KEY = 'e751e6e4dab2e4874be371c082455fd1';
 
 export default function App() {
   const [ok, setOk] = useState(true);
 
-  const [city, setCity] = useState('Loding...');
-  const [district, setDistrict] = useState('...');
+  const [city, setCity] = useState('');
+  const [district, setDistrict] = useState('');
 
   const [days, setDays] = useState([]);
+  const [weather, setWeather] = useState();
 
   const getWeather = async () => {
     const { granted } = await Location.requestForegroundPermissionsAsync();
@@ -39,7 +49,8 @@ export default function App() {
       `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
     );
     const json = await response.json();
-    console.log(json);
+    // console.log(json);
+    setWeather(json.weather[0].main);
   };
 
   useEffect(() => {
@@ -49,10 +60,17 @@ export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-      <View style={styles.city}>
-        <Text style={styles.cityName}>{city}</Text>
-        <Text style={styles.district}>{district}</Text>
-      </View>
+      {city === '' ? (
+        <View style={styles.city}>
+          <ActivityIndicator color="black" size="large" />
+        </View>
+      ) : (
+        <View style={styles.city}>
+          <Text style={styles.cityName}>{city}</Text>
+          <Text style={styles.district}>{district}</Text>
+        </View>
+      )}
+
       <ScrollView
         horizontal
         pagingEnabled
@@ -62,23 +80,7 @@ export default function App() {
       >
         <View style={styles.day}>
           <Text style={styles.temp}>27</Text>
-          <Text style={styles.desc}>sunny</Text>
-        </View>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.desc}>sunny</Text>
-        </View>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.desc}>sunny</Text>
-        </View>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.desc}>sunny</Text>
-        </View>
-        <View style={styles.day}>
-          <Text style={styles.temp}>27</Text>
-          <Text style={styles.desc}>sunny</Text>
+          <Text style={styles.desc}>{weather}</Text>
         </View>
         <View style={styles.day}>
           <Text style={styles.temp}>27</Text>
