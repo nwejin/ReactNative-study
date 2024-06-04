@@ -18,6 +18,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
 
+import Test from './screen/test';
+
+import axios from 'axios';
+
 const STORAGE_KEY = '@toDos';
 
 export default function App() {
@@ -29,6 +33,8 @@ export default function App() {
   const [isCalendar, setIsCalendar] = useState(false);
   const [text, setText] = useState('');
   const [toDos, setToDos] = useState({});
+
+  const [isDB, setIsDB] = useState('');
 
   const work = () => {
     setWorking(true);
@@ -71,6 +77,35 @@ export default function App() {
     setText('');
   };
   // console.log(toDos);
+
+  const testSubmit = async () => {
+    try {
+      const data = { content: isDB };
+      console.log('data >', isDB);
+      const response = await dataPost(isDB);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const dataPost = async (data) => {
+    try {
+      const res = await axios.post(
+        'http://172.30.1.55:3000',
+        { content: data },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+        }
+      );
+      console.log('res >', res);
+      return res;
+    } catch (error) {
+      throw new Error('post 오류 발생');
+    }
+  };
 
   const deleteToDo = (key) => {
     // Alert.prompt('이름을 입력해주세요');
@@ -115,17 +150,24 @@ export default function App() {
             Travel
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={calendar}>
-          <Text
-            style={{
-              ...styles.btnText,
-              color: isCalendar ? 'white' : theme.gray,
-            }}
-          >
-            Calendar
-          </Text>
-        </TouchableOpacity>
       </View>
+
+      <View>
+        <TextInput
+          // multiline
+          autoCorrect
+          onChangeText={(e) => {
+            setIsDB(e);
+          }}
+          placeholderTextColor={theme.gray}
+          returnKeyType="send"
+          value={isDB}
+          placeholder="DB 연결 실험"
+          onSubmitEditing={testSubmit}
+          style={styles.input}
+        />
+      </View>
+
       <View>
         <TextInput
           // multiline
@@ -141,7 +183,7 @@ export default function App() {
           style={styles.input}
         />
       </View>
-      <ScrollView>
+      <ScrollView style={styles.mainContainer}>
         {Object.keys(toDos).map((key) =>
           toDos[key].working === working ? (
             <View style={styles.toDo} key={key}>
